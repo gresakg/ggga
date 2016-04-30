@@ -43,21 +43,25 @@ class Ggga {
 	public function print_ga() {
 		if(!empty($this->tracking_id)) {
 			echo "
-			<script>
-			  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-			  ga('create', '" . $this->tracking_id . "', 'auto');
-			  ga('send', 'pageview');
+  ga('create', '" . $this->tracking_id . "', 'auto');
+  ga('send', 'pageview');
 
-			</script>";
+</script>";
 		}	
 	}
 
 	protected function set_actions() {
-		add_action('wp_head',array($this,'print_ga'));
+		if(has_action('after_body_tag')) {
+			add_action('after_body_tag',array($this,'print_ga'));
+		} else {
+			add_action('get_footer',array($this,'print_ga'));
+		}
 		add_action( 'customize_register', array($this,'customizer') );
 	}
 
