@@ -15,6 +15,8 @@ class Ggga {
 
 	protected $tracking_id;
 
+	protected $code_inserted = false;
+
 	public function __construct() {
 		$this->tracking_id = get_theme_mod('tracking_id');
 		$this->set_actions();
@@ -53,15 +55,20 @@ class Ggga {
   ga('send', 'pageview');
 
 </script>";
-		}	
+		}
+		$this->code_inserted = true;	
+	}
+
+	public function print_ga_in_footer() {
+		if(!$this->code_inserted) {
+			$this->print_ga();
+		}
+
 	}
 
 	protected function set_actions() {
-		if(has_action('after_body_tag')) {
-			add_action('after_body_tag',array($this,'print_ga'));
-		} else {
-			add_action('get_footer',array($this,'print_ga'));
-		}
+		add_action('after_body_tag',array($this,'print_ga'));
+		add_action('get_footer',array($this,'print_ga_in_footer'));
 		add_action( 'customize_register', array($this,'customizer') );
 	}
 
