@@ -5,21 +5,56 @@ Plugin Name: GA by GG
 Plugin URI: http://gresak.net
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 1.0
+Version: 2.0
 Author URI: http://gresak.net
 */
 
-new Ggga();
+$ggga = new Ggga();
 
 class Ggga {
 
 	protected $tracking_id;
 
+	protected $action_hook;
+
 	protected $code_inserted = false;
 
 	public function __construct() {
-		$this->tracking_id = get_theme_mod('tracking_id');
-		$this->set_actions();
+		$this->set_tracking_id();
+		$this->set_action_hook();
+		add_action($this->action_hook, array($this,'print_ga'));
+		add_action( 'customize_register', array($this,'customizer') );
+		add_action ( 'admin_init', array($this, 'register_settings'));
+		add_action( 'admin_notices', array($this, 'tracking_id_missing'));
+	}
+
+	public function register_settings() {
+		register_setting('general','ga_tracking_id');
+		register_setting('general','ggga_action_hook');
+		add_settings_field( 'ga_tracking_id', "GA Tracking ID", array($this,'tracking_id_input_field'), 'general' );
+		add_settings_field( 'ggga_action_hook', "GA Action Hook", array($this,'action_hook_input_field'), 'general' );
+	}
+
+	public function tracking_id_input_field() {
+		echo "<input type='text' name='ga_tracking_id' value='".get_option( 'ga_tracking_id' )."'>";
+	}
+
+	public function action_hook_input_field() {
+		echo "<input type='text' name='ggga_action_hook' value='".get_option( 'ggga_action_hook', "wp_head" )."'>";
+	}
+
+	public function tracking_id_missing() {
+		$class = "notice ";
+		if(empty($this->tracking_id)) {
+			$message = "Google Analytics tracking_id is missing! Please set it in <a href='".get_admin_url()."/options_general'>Settings > General</a> ";
+			$class .= 'notice-error';
+		} elseif(empty(get_option('ga_tracking_id'))) {
+			$message = "Google Analytics options are set using theme options! This has been deprecated since the version 1.0 of the plugin. Your code will still work untill you change your theme or the next version of this plugin.<br> Please set the tracking ID and optionally the action hook in <a href='".get_admin_url()."/options_general'>Settings > General</a> ";
+			$class .= 'notice-warning is-dismissible';
+		}
+		if(isset($message)) {
+			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+		}
 	}
 
 	public function customizer($customize) {
@@ -40,9 +75,25 @@ class Ggga {
 					)
 				)
 			);
+		$customize->add_setting('ggga_action',array("default"=>"wp_head"));
+		$customize->add_control(
+			new WP_Customize_Control(
+				$customize,
+				'ggga_action',
+				array(
+					'label' => "Action hook",
+					'description' => "WP Action hook that will print out the code. You can use it to print the code after the body tag in your theme has an action hook at the approproate place. Do not change if you don't know what you're doing!",
+					'section' => 'google_analytics',
+					'settings' => 'ggga_action'
+					)
+				)
+			);
 	}
 
 	public function print_ga() {
+
+		if($this->code_inserted) return;
+
 		if(!empty($this->tracking_id)) {
 			echo "
 <script>
@@ -59,17 +110,18 @@ class Ggga {
 		$this->code_inserted = true;	
 	}
 
-	public function print_ga_in_footer() {
-		if(!$this->code_inserted) {
-			$this->print_ga();
-		}
-
+	protected function set_tracking_id() {
+		$this->tracking_id = get_option('ga_tracking_id');
+		if(empty($this->tracking_id)) {
+			$this->tracking_id = get_theme_mod('tracking_id');
+		} 
 	}
 
-	protected function set_actions() {
-		add_action('after_body_tag',array($this,'print_ga'));
-		add_action('get_footer',array($this,'print_ga_in_footer'));
-		add_action( 'customize_register', array($this,'customizer') );
+	protected function set_action_hook() {
+		$this->action_hook = get_option('ggga_action_hook');
+		if(empty($this->action_hook)) {
+			$this->action_hook = get_theme_mod('ggga_action','wp_head');
+		}
 	}
 
 }
