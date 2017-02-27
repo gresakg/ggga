@@ -5,7 +5,7 @@ Plugin Name: GA by GG
 Plugin URI: http://gresak.net
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 2.0
+Version: 2.1
 Author URI: http://gresak.net
 */
 
@@ -46,7 +46,7 @@ class Ggga {
 	public function tracking_id_missing() {
 		$class = "notice ";
 		if(empty($this->tracking_id)) {
-			$message = "Google Analytics tracking_id is missing! Please set it in <a href='".get_admin_url()."/options_general'>Settings > General</a> ";
+			$message = "Google Analytics tracking_id is missing! Please set it in <a href='".get_admin_url()."options-general.php'>Settings > General</a> ";
 			$class .= 'notice-error';
 		} elseif(empty(get_option('ga_tracking_id'))) {
 			$message = "Google Analytics options are set using theme options! This has been deprecated since the version 1.0 of the plugin. Your code will still work untill you change your theme or the next version of this plugin.<br> Please set the tracking ID and optionally the action hook in <a href='".get_admin_url()."/options_general'>Settings > General</a> ";
