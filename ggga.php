@@ -26,6 +26,27 @@ class Ggga {
 		add_action( 'customize_register', array($this,'customizer') );
 		add_action ( 'admin_init', array($this, 'register_settings'));
 		add_action( 'admin_notices', array($this, 'tracking_id_missing'));
+		add_action( $this->action_hook, array($this, 'cf7_event_tracking'));
+	}
+
+	public function cf7_event_tracking() {
+		if(!defined("WPCF7_VERSION")) return;
+
+		//general, for contact forms in footers and sidebars
+		$string="Contact form";
+
+		//for singular posts take the post title
+		if(is_singular()) {
+			//global $post;
+			$string = $this->get_form_name();//$post->post_title;
+		} 
+		echo "
+<script>
+	document.addEventListener( 'wpcf7mailsent', function( event ) {
+	    ga('send', 'event', '".$string."', 'submit');
+	}, false );
+</script>
+";
 	}
 
 	public function register_settings() {
@@ -108,6 +129,15 @@ class Ggga {
 </script>";
 		}
 		$this->code_inserted = true;	
+	}
+
+	protected function get_form_name() {
+		global $post;
+		preg_match("/\[contact-form-7(.+?)?\]/",$post->post_content,$matches);
+		//var_dump($matches);
+		$atts = shortcode_parse_atts($matches[1]);
+		if(isset($atts['title'])) return $atts['title'];
+		else return "Contact form";
 	}
 
 	protected function set_tracking_id() {
