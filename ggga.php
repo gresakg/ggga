@@ -9,7 +9,7 @@ Version: 3.0.0
 Author URI: http://gresak.net
 */
 
-$ggga = new Ggga();
+$ggga = Ggga::instance(__FILE__);
 
 class Ggga {
 
@@ -19,7 +19,9 @@ class Ggga {
 
 	protected $code_inserted = false;
 
-	public function __construct() {
+	private static $instance;
+
+	protected function __construct() {
 		$this->set_tracking_id();
 		$this->set_action_hook();
 		add_action($this->action_hook, array($this,'print_ga'));
@@ -153,5 +155,13 @@ class Ggga {
 			$this->action_hook = get_theme_mod('ggga_action','wp_head');
 		}
 	}
+
+	public static function instance($path) {
+
+        if (self::$instance === null) {
+            self::$instance = new self($path);
+        }
+        return self::$instance;
+    }
 
 }
