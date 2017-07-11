@@ -5,7 +5,7 @@ Plugin Name: GA by GG
 Plugin URI: http://gresak.net
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 2.1
+Version: 3.0.0
 Author URI: http://gresak.net
 */
 
