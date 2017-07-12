@@ -56,7 +56,7 @@ class Ggga {
 		}
 		$this->missing_hook = get_option('ggga_missing_hook');
 		if($this->missing_hook === false) {
-			set_option('ggga_missing_hook',0);
+			add_option('ggga_missing_hook',0);
 		}
 	}
 
@@ -139,7 +139,7 @@ class Ggga {
 		echo "
 <script>
 (function($){
-	$(a).on('click',function(e){
+	$('a').on('click',function(e){
 		var url = $(this).attr('href');
 		if (e.currentTarget.host != window.location.host) {
 			ga('send', 'event', 'outbound', 'click', url, {
