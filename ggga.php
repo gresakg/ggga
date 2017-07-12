@@ -2,14 +2,14 @@
 
 /*
 Plugin Name: GA by GG
-Plugin URI: http://gresak.net
+Plugin URI: http://demo.gresak.net/ggga
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 2.1
+Version: 3.0.0
 Author URI: http://gresak.net
 */
 
-$ggga = new Ggga();
+$ggga = Ggga::instance(__FILE__);
 
 class Ggga {
 
@@ -19,98 +19,51 @@ class Ggga {
 
 	protected $code_inserted = false;
 
-	public function __construct() {
+	protected $missing_hook;
+
+	private static $instance;
+
+	protected function __construct() {
 		$this->set_tracking_id();
 		$this->set_action_hook();
 		add_action($this->action_hook, array($this,'print_ga'));
-		add_action( 'customize_register', array($this,'customizer') );
+		add_action('wp_footer',array($this, 'is_code_inserted'));
+		add_action( $this->action_hook, array($this, 'cf7_event_tracking'));
+		add_action('wp_footer', array($this,'outbound_link_tracking'));
 		add_action ( 'admin_init', array($this, 'register_settings'));
 		add_action( 'admin_notices', array($this, 'tracking_id_missing'));
-		add_action( $this->action_hook, array($this, 'cf7_event_tracking'));
+		add_filter('pre_set_site_transient_update_plugins', array($this,'updater'));
 	}
 
-	public function cf7_event_tracking() {
-		if(!defined("WPCF7_VERSION")) return;
-
-		//general, for contact forms in footers and sidebars
-		$string="Contact form";
-
-		//for singular posts take the post title
-		if(is_singular()) {
-			//global $post;
-			$string = $this->get_form_name();//$post->post_title;
-		} 
-		echo "
-<script>
-	document.addEventListener( 'wpcf7mailsent', function( event ) {
-	    ga('send', 'event', '".$string."', 'submit');
-	}, false );
-</script>
-";
-	}
-
-	public function register_settings() {
-		register_setting('general','ga_tracking_id');
-		register_setting('general','ggga_action_hook');
-		add_settings_field( 'ga_tracking_id', "GA Tracking ID", array($this,'tracking_id_input_field'), 'general' );
-		add_settings_field( 'ggga_action_hook', "GA Action Hook", array($this,'action_hook_input_field'), 'general' );
-	}
-
-	public function tracking_id_input_field() {
-		echo "<input type='text' name='ga_tracking_id' value='".get_option( 'ga_tracking_id' )."'>";
-	}
-
-	public function action_hook_input_field() {
-		echo "<input type='text' name='ggga_action_hook' value='".get_option( 'ggga_action_hook', "wp_head" )."'>";
-	}
-
-	public function tracking_id_missing() {
-		$class = "notice ";
+	/**
+	 * Sets the google analytics tracking id. If the option is not set, checks
+	 * theme costumizer mod for compatibility reasons
+	 */
+	protected function set_tracking_id() {
+		$this->tracking_id = get_option('ga_tracking_id');
 		if(empty($this->tracking_id)) {
-			$message = "Google Analytics tracking_id is missing! Please set it in <a href='".get_admin_url()."options-general.php'>Settings > General</a> ";
-			$class .= 'notice-error';
-		} elseif(empty(get_option('ga_tracking_id'))) {
-			$message = "Google Analytics options are set using theme options! This has been deprecated since the version 1.0 of the plugin. Your code will still work untill you change your theme or the next version of this plugin.<br> Please set the tracking ID and optionally the action hook in <a href='".get_admin_url()."/options_general'>Settings > General</a> ";
-			$class .= 'notice-warning is-dismissible';
+			if ($this->tracking_id = get_theme_mod('tracking_id')) add_option('ga_tracking_id',$this->tracking_id);
+		} 
+	}
+
+	/**
+	 * Allows the use of themes custom action hook for tracking output
+	 */
+	protected function set_action_hook() {
+		$this->action_hook = get_option('ggga_action_hook');
+		if(empty($this->action_hook)) {
+			$this->action_hook = get_theme_mod('ggga_action','wp_head');
 		}
-		if(isset($message)) {
-			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+		$this->missing_hook = get_option('ggga_missing_hook');
+		if($this->missing_hook === false) {
+			add_option('ggga_missing_hook',0);
 		}
 	}
 
-	public function customizer($customize) {
-		
-		$customize->add_section('google_analytics', array(
-			"title" => "Google Analytics",
-			"priority" => 100
-			));
-		$customize->add_setting('tracking_id',array("default"=>""));
-		$customize->add_control(
-			new WP_Customize_Control(
-				$customize,
-				'tracking_id',
-				array(
-					'label' => 'Google analytics tracking ID',
-					'section' => 'google_analytics',
-					'settings' => 'tracking_id'
-					)
-				)
-			);
-		$customize->add_setting('ggga_action',array("default"=>"wp_head"));
-		$customize->add_control(
-			new WP_Customize_Control(
-				$customize,
-				'ggga_action',
-				array(
-					'label' => "Action hook",
-					'description' => "WP Action hook that will print out the code. You can use it to print the code after the body tag in your theme has an action hook at the approproate place. Do not change if you don't know what you're doing!",
-					'section' => 'google_analytics',
-					'settings' => 'ggga_action'
-					)
-				)
-			);
-	}
-
+	/**
+	 * Output of the actual code
+	 * @return [type] [description]
+	 */
 	public function print_ga() {
 
 		if($this->code_inserted) return;
@@ -131,6 +84,42 @@ class Ggga {
 		$this->code_inserted = true;	
 	}
 
+	/**
+	 * Catches the last train to output the code in case the custom theme hook
+	 * no longer exists (because theme was updated)
+	 * @return boolean [description]
+	 */
+	public function is_code_inserted() {
+		if($this->code_inserted === false) {
+			update_option("missing_hook", 1);
+			$this->print_ga();
+		}
+	}
+
+	/**
+	 * Tracks CF7 posts as events.
+	 * @return [type] [description]
+	 */
+	public function cf7_event_tracking() {
+		if(!defined("WPCF7_VERSION")) return;
+
+		//general, for contact forms in footers and sidebars
+		$string="Contact form";
+
+		//for singular posts take the post title
+		if(is_singular()) {
+			//global $post;
+			$string = $this->get_form_name();//$post->post_title;
+		} 
+		echo "
+<script>
+	document.addEventListener( 'wpcf7mailsent', function( event ) {
+	    ga('send', 'event', '".$string."', 'submit');
+	}, false );
+</script>
+";
+	}
+
 	protected function get_form_name() {
 		global $post;
 		preg_match("/\[contact-form-7(.+?)?\]/",$post->post_content,$matches);
@@ -140,18 +129,80 @@ class Ggga {
 		else return "Contact form";
 	}
 
-	protected function set_tracking_id() {
-		$this->tracking_id = get_option('ga_tracking_id');
-		if(empty($this->tracking_id)) {
-			$this->tracking_id = get_theme_mod('tracking_id');
-		} 
+	/**
+	 * Tracks outbound links click.
+	 * @return [type] [description]
+	 */
+	public function outbound_link_tracking() {
+		// default is do track
+		if(!get_option('ggga_track_outbound',true)) return;
+		echo "
+<script>
+(function($){
+	$('a').on('click',function(e){
+		var url = $(this).attr('href');
+		if (e.currentTarget.host != window.location.host) {
+			ga('send', 'event', 'outbound', 'click', url, {
+			    'transport': 'beacon',
+			    'hitCallback': function(){document.location = url;}
+			});
+		}
+	});
+})(jQuery);
+</script>
+";
 	}
 
-	protected function set_action_hook() {
-		$this->action_hook = get_option('ggga_action_hook');
-		if(empty($this->action_hook)) {
-			$this->action_hook = get_theme_mod('ggga_action','wp_head');
+	public function register_settings() {
+		register_setting('general','ga_tracking_id');
+		register_setting('general','ggga_action_hook');
+		register_setting('general','ggga_track_outbound');
+		add_settings_field( 'ga_tracking_id', "GA Tracking ID", array($this,'tracking_id_input_field'), 'general' );
+		add_settings_field( 'ggga_action_hook', "GA Action Hook", array($this,'action_hook_input_field'), 'general' );
+		add_settings_field( 'ggga_track_outbound', "GA Track Outbound links", array($this,'track_outbound_checkbox'), 'general' );
+	}
+
+	public function tracking_id_input_field() {
+		echo "<input type='text' name='ga_tracking_id' value='".get_option( 'ga_tracking_id' )."'>";
+	}
+
+	public function action_hook_input_field() {
+		echo "<input type='text' name='ggga_action_hook' value='".get_option( 'ggga_action_hook', "wp_head" )."'>";
+	}
+
+	public function track_outbound_checkbox() {
+		$checked = get_option('ggga_track_outbound',true)?"checked='checked' ":"";
+		echo  "<input type='checkbox' name='ggga_action_hook' value='1' ".$checked.">";
+	}
+
+	public function tracking_id_missing() {
+		$class = "notice ";
+		if(empty($this->tracking_id)) {
+			$message = "Google Analytics tracking_id is missing! Please set it in <a href='".get_admin_url()."options-general.php'>Settings > General</a> ";
+			$class .= 'notice-error';
+		}
+		if(isset($message)) {
+			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
 		}
 	}
+
+	public function updater($transient) {
+		if( empty( $transient->checked['ggga'] ) ) return $transient;
+		$response = wp_remote_get("http://demo.gresak.net/ggga/ggga.json");
+		$result = $response['body'];
+		if( $data = json_decode( $result ) ){
+		   if( version_compare( $transient->checked['ggga'], $data->new_version, '<' ) )
+		 	$transient->response['ggga'] = (array) $data;
+		}
+	    return $transient;
+	}
+
+	public static function instance($path) {
+
+        if (self::$instance === null) {
+            self::$instance = new self($path);
+        }
+        return self::$instance;
+    }
 
 }
