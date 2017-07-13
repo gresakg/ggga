@@ -5,7 +5,7 @@ Plugin Name: GA by GG
 Plugin URI: http://demo.gresak.net/ggga
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 3.0.0
+Version: 3.0.1
 Author URI: http://gresak.net
 */
 
@@ -187,12 +187,12 @@ class Ggga {
 	}
 
 	public function updater($transient) {
-		if( empty( $transient->checked['ggga'] ) ) return $transient;
+		if( empty( $transient->checked['ggga/ggga.php'] ) ) return $transient;
 		$response = wp_remote_get("http://demo.gresak.net/ggga/ggga.json");
 		$result = $response['body'];
 		if( $data = json_decode( $result ) ){
-		   if( version_compare( $transient->checked['ggga'], $data->new_version, '<' ) )
-		 	$transient->response['ggga'] = (array) $data;
+		   if( version_compare( $transient->checked['ggga/ggga.php'], $data->new_version, '<' ) )
+		 	$transient->response['ggga/ggga.php'] = (array) $data;
 		}
 	    return $transient;
 	}
