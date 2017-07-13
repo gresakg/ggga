@@ -32,7 +32,7 @@ class Ggga {
 		add_action('wp_footer', array($this,'outbound_link_tracking'));
 		add_action ( 'admin_init', array($this, 'register_settings'));
 		add_action( 'admin_notices', array($this, 'tracking_id_missing'));
-		add_filter('pre_set_site_transient_update_plugins', array($this,'updater'));
+		add_filter('init', array($this,'updater'));
 	}
 
 	/**
@@ -186,15 +186,13 @@ class Ggga {
 		}
 	}
 
-	public function updater($transient) {
-		if( empty( $transient->checked['ggga/ggga.php'] ) ) return $transient;
-		$response = wp_remote_get("http://demo.gresak.net/ggga/ggga.json");
-		$result = $response['body'];
-		if( $data = json_decode( $result ) ){
-		   if( version_compare( $transient->checked['ggga/ggga.php'], $data->new_version, '<' ) )
-		 	$transient->response['ggga/ggga.php'] = (array) $data;
-		}
-	    return $transient;
+	public function updater() {
+		include_once "GG_auto_update.php";
+		$version = get_file_data(__FILE__,array("Version"));
+		$version = $version[0];
+		$remote_path = "http://demo.gresak.net/ggga/update.php";
+		$plugin = "ggga/ggga.php";
+		new GG_auto_update($version,$remote_path,$plugin); 
 	}
 
 	public static function instance($path) {
