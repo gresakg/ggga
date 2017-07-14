@@ -5,7 +5,7 @@ Plugin Name: GA by GG
 Plugin URI: http://demo.gresak.net/ggga
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 3.0.2
+Version: 3.0.3
 Author URI: http://gresak.net
 */
 
@@ -172,7 +172,7 @@ class Ggga {
 
 	public function track_outbound_checkbox() {
 		$checked = get_option('ggga_track_outbound',true)?"checked='checked' ":"";
-		echo  "<input type='checkbox' name='ggga_action_hook' value='1' ".$checked.">";
+		echo  "<input type='checkbox' name='ggga_track_outbound' value='1' ".$checked.">";
 	}
 
 	public function tracking_id_missing() {
