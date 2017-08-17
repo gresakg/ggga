@@ -1,5 +1,5 @@
 <?php 
-
+if(!class_exists('GG_auto_update')):
 /**
  * Code by Abid Omar/Tuts+ https://github.com/omarabid
  * https://code.tutsplus.com/tutorials/a-guide-to-the-wordpress-http-api-automatic-plugin-updates--wp-25181
@@ -135,3 +135,4 @@ class GG_auto_update
         return false;
     }
 }
+endif;
