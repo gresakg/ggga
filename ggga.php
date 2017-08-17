@@ -5,7 +5,7 @@ Plugin Name: GA by GG
 Plugin URI: http://demo.gresak.net/ggga
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 3.0.3
+Version: 3.0.4
 Author URI: http://gresak.net
 */
 
