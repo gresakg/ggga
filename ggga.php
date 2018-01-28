@@ -154,17 +154,34 @@ class Ggga {
 	}
 
 	public function register_settings() {
-		add_settings_section('gg_analytics',__('Analytics Settings'), array($this, 'settings_section_callback'),'general');
+		add_settings_section('gg_analytics',__('GG Analytics Settings'), array($this, 'settings_section_callback'),'general');
 		register_setting('general','ga_tracking_id');
 		register_setting('general','ggga_action_hook');
 		register_setting('general','ggga_track_outbound');
-		add_settings_field( 'ga_tracking_id', "GA Tracking ID", array($this,'tracking_id_input_field'), 'general', 'gg_analytics');
-		add_settings_field( 'ggga_action_hook', "GA Action Hook", array($this,'action_hook_input_field'), 'general', 'gg_analytics' );
-		add_settings_field( 'ggga_track_outbound', "GA Track Outbound links", array($this,'track_outbound_checkbox'), 'general', 'gg_analytics' );
+		register_setting('general','ggga_use_old_analytics_js');
+		add_settings_field('ggga_use_old_analytics_js', 
+			__("Use analytics.js tracking code"),
+			array($this, "use_analytics_js"), 
+			"general",'gg_analytics');
+		add_settings_field( 'ga_tracking_id', __("GA Tracking ID"), array($this,'tracking_id_input_field'), 'general', 'gg_analytics');
+		add_settings_field( 'ggga_action_hook', __("GA Action Hook"), array($this,'action_hook_input_field'), 'general', 'gg_analytics' );
+		add_settings_field( 'ggga_track_outbound', __("GA Track Outbound links"), array($this,'track_outbound_checkbox'), 'general', 'gg_analytics' );
 	}
 
 	public function settings_section_callback() {
 		echo "<p>".__("Section for your Analytics settings.")."</p>";
+	}
+
+	public function use_analytics_js() {
+		$default = false;
+		if(get_option('ga_tracking_id',false)) {
+			$default=true;
+		}
+		$checked = get_option('ggga_use_old_analytics_js',$default)?"checked='checked' ":"";
+		echo  "<input type='checkbox' name='ggga_use_old_analytics_js' value='1' ".$checked.">";
+		echo __(" <span class='small'> By default, Ggga uses the new gtag.js since plugin version 4.0.0. 
+			However, if you upgraded the plugin from an older version, this will be checked untill you decide it's time to use 
+			the new code.</span>");
 	}
 
 
