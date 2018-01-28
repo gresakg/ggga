@@ -144,8 +144,7 @@ class Ggga {
 		if(typeof url == 'undefined') { return; }
 		if (e.currentTarget.host != window.location.host) {
 			ga('send', 'event', 'outbound', 'click', url, {
-			    'transport': 'beacon',
-			    'hitCallback': function(){document.location = url;}
+			    'transport': 'beacon'
 			});
 		}
 	});
