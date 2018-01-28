@@ -5,7 +5,7 @@ Plugin Name: GA by GG
 Plugin URI: http://demo.gresak.net/ggga
 Description: Simple plugin for google analytics
 Author: Gregor Grešak
-Version: 3.0.6
+Version: 3.1.0
 Author URI: http://gresak.net
 */
 
@@ -154,13 +154,19 @@ class Ggga {
 	}
 
 	public function register_settings() {
+		add_settings_section('gg_analytics',__('Analytics Settings'), array($this, 'settings_section_callback'),'general');
 		register_setting('general','ga_tracking_id');
 		register_setting('general','ggga_action_hook');
 		register_setting('general','ggga_track_outbound');
-		add_settings_field( 'ga_tracking_id', "GA Tracking ID", array($this,'tracking_id_input_field'), 'general' );
-		add_settings_field( 'ggga_action_hook', "GA Action Hook", array($this,'action_hook_input_field'), 'general' );
-		add_settings_field( 'ggga_track_outbound', "GA Track Outbound links", array($this,'track_outbound_checkbox'), 'general' );
+		add_settings_field( 'ga_tracking_id', "GA Tracking ID", array($this,'tracking_id_input_field'), 'general', 'gg_analytics');
+		add_settings_field( 'ggga_action_hook', "GA Action Hook", array($this,'action_hook_input_field'), 'general', 'gg_analytics' );
+		add_settings_field( 'ggga_track_outbound', "GA Track Outbound links", array($this,'track_outbound_checkbox'), 'general', 'gg_analytics' );
 	}
+
+	public function settings_section_callback() {
+		echo "<p>".__("Section for your Analytics settings.")."</p>";
+	}
+
 
 	public function tracking_id_input_field() {
 		echo "<input type='text' name='ga_tracking_id' value='".get_option( 'ga_tracking_id' )."'>";
