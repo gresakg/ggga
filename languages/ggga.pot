@@ -1,0 +1,93 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-01-31 19:53+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco - https://localise.biz/"
+
+#: ggga.php:198
+msgid "GG Analytics Settings"
+msgstr ""
+
+#: ggga.php:204
+msgid "Use analytics.js tracking code"
+msgstr ""
+
+#: ggga.php:207
+msgid "GA Tracking ID"
+msgstr ""
+
+#: ggga.php:208
+msgid "GA Action Hook"
+msgstr ""
+
+#: ggga.php:209
+msgid "GA Track Outbound links"
+msgstr ""
+
+#: ggga.php:213
+msgid "Section for your Analytics settings."
+msgstr ""
+
+#: ggga.php:223
+#, php-format
+msgid ""
+" <span class='small'> By default, %s uses the new gtag.js since plugin "
+"version 4.0.0. \n"
+"\t\t\t\t\tHowever, if you upgraded the plugin from an older version, this "
+"will be checked untill you decide it's time to use \n"
+"\t\t\t\t\tthe new code.</span>"
+msgstr ""
+
+#: ggga.php:245
+#, php-format
+msgid ""
+"Google Analytics tracking_id is missing! Please set it in <a href='%soptions-"
+"general.php'>Settings > General</a> "
+msgstr ""
+
+#: ggga.php:249
+#, php-format
+msgid ""
+" has been updated to version 4.0.0. and needs your attention.<br> \n"
+"\t\t\t\tThe new version uses the gtag.js tracking code by default for new "
+"users (as recommended by Google since December 2017). However, if you \n"
+"\t\t\t\tupgraded the plugin from an older version, you still have your old "
+"analytics.js code in place as we don't want to break your\n"
+"\t\t\t\tsettings. To decide which code to use, please go to  <a "
+"href='%soptions-general.php'>Settings > General</a> \n"
+"\t\t\t\tand either submit the form by leaving the setting checked, or "
+"uncheck it to use the new code. \n"
+"\t\t\t\t<a href='https://gresak.net/analytics-integration-plugin/'>More "
+"informations</a><br>\n"
+"\t\t\t\tUntil you do that, this notice will remain active."
+msgstr ""
+
+#. Name of the plugin
+msgid "GA by GG"
+msgstr ""
+
+#. Description of the plugin
+msgid "Simple plugin for google analytics"
+msgstr ""
+
+#. URI of the plugin
+msgid "http://demo.gresak.net/ggga"
+msgstr ""
+
+#. Author of the plugin
+msgid "Gregor Grešak"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "http://gresak.net"
+msgstr ""

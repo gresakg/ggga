@@ -16,6 +16,10 @@ No code will be echoed unless the tracking code is present.
 
 From version 2.0 you can optionally add the action hook that will echo your tracking code. By default this will be wp_head, but you could use get_footer or a specific theme hook if it exists (like after_body_tag).
 
+From version 3.0 you can track Contact Form 7 submit events and outbound links.
+
+From version 4.0 the plugin uses the new gtag.js tracking code by default for new users, but leaves the old code for compatibility reasons. Version 4.0 is also localization ready.
+
 ## License
 
 GA for WP by GG simple plugin for inserting GA tracking code to your WP.
