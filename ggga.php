@@ -41,7 +41,7 @@ class Ggga {
 		add_action($this->action_hook, array($this,'print_ga'));
 		add_action('wp_footer',array($this, 'is_code_inserted'));
 		add_action( $this->action_hook, array($this, 'cf7_event_tracking'));
-		add_action($this->action_hook, array($this,'outbound_link_tracking'));
+		add_action('wp_footer', array($this,'outbound_link_tracking'));
 		add_action ( 'admin_init', array($this, 'register_settings'));
 		add_action( 'admin_notices', array($this, 'tracking_id_missing'));
 		add_action( 'plugins_loaded', array($this,'load_textdomain'));
@@ -117,7 +117,7 @@ class Ggga {
 	    gtag('event', '".$this->cf7string."' , {'event_category': 'cf7submit'});
 	}, false );
 </script>";
-			$this->code['links'] = "gtag('event','click',{'event_category':'outbound','event_label':url})";
+			$this->code['links'] = "gtag('event','click',{'event_category':'outbound','event_label':url});";
 
 		}
 	}
@@ -184,7 +184,7 @@ class Ggga {
 	$('a').on('click',function(e){
 		var url = $(this).attr('href');
 		if(typeof url == 'undefined') { return; }
-		if (e.currentTarget.host != window.location.host) {"
+		if (e.currentTarget.host != window.location.host) {"."\n"
 			.$this->code['links'].
 		"
 		}
