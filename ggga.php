@@ -153,7 +153,7 @@ class Ggga {
 	 * @return [type] [description]
 	 */
 	public function cf7_event_tracking() {
-		if(!defined("WPCF7_VERSION")) return;
+		if(!defined("WPCF7_VERSION") || !get_option('ggga_track_cf7',true)) return;
 		//for singular posts take the post title
 		if(is_singular()) {
 			//global $post;
@@ -200,13 +200,19 @@ class Ggga {
 		register_setting('general','ggga_action_hook');
 		register_setting('general','ggga_track_outbound');
 		register_setting('general','ggga_use_old_analytics_js');
+		add_settings_field( 'ga_tracking_id', __("GA Tracking ID",'ggga'), array($this,'tracking_id_input_field'), 'general', 'gg_analytics');
+		add_settings_field( 'ggga_track_outbound', __("GA Track Outbound links",'ggga'), array($this,'track_outbound_checkbox'), 'general', 'gg_analytics' );
+		if(defined("WPCF7_VERSION")) {
+			register_setting('general','ggga_track_cf7');
+			add_settings_field( 'ggga_track_cf7', __('Track CF7 form submissions','ggga'), array($this,'track_cf7_checkbox'), 'general', 'gg_analytics');
+		}
 		add_settings_field('ggga_use_old_analytics_js', 
-			__("Use analytics.js tracking code", 'ggga'),
+			__("Use old analytics.js tracking code", 'ggga'),
 			array($this, "use_analytics_js"), 
 			"general",'gg_analytics');
-		add_settings_field( 'ga_tracking_id', __("GA Tracking ID",'ggga'), array($this,'tracking_id_input_field'), 'general', 'gg_analytics');
-		add_settings_field( 'ggga_action_hook', __("GA Action Hook",'ggga'), array($this,'action_hook_input_field'), 'general', 'gg_analytics' );
-		add_settings_field( 'ggga_track_outbound', __("GA Track Outbound links",'ggga'), array($this,'track_outbound_checkbox'), 'general', 'gg_analytics' );
+		if(get_option('ggga_use_old_analytics_js',true)) {
+			add_settings_field( 'ggga_action_hook', __("GA Action Hook",'ggga'), array($this,'action_hook_input_field'), 'general', 'gg_analytics' );
+		}
 	}
 
 	public function settings_section_callback() {
@@ -232,11 +238,19 @@ class Ggga {
 
 	public function action_hook_input_field() {
 		echo "<input type='text' name='ggga_action_hook' value='".get_option( 'ggga_action_hook', "wp_head" )."'>";
+		echo "<br>".__("If you are using the old analytics.js code, it is recommended to put it right after the opening body tag. 
+			If your theme has a hook there, you can use that hook to output tracking code. Else it's best to leave it as is.
+			Don't change this if you don't know what you are doing.<br>The new tracking code ignores this setting.",'ggga');
 	}
 
 	public function track_outbound_checkbox() {
 		$checked = get_option('ggga_track_outbound',true)?"checked='checked' ":"";
 		echo  "<input type='checkbox' name='ggga_track_outbound' value='1' ".$checked.">";
+	}
+
+	public function track_cf7_checkbox() {
+		$checked = get_option('ggga_track_cf7',true)?"checked='checked' ":"";
+		echo  "<input type='checkbox' name='ggga_track_cf7' value='1' ".$checked.">";
 	}
 
 	public function tracking_id_missing() {
