@@ -1,6 +1,6 @@
 # GA for WP by GG
 
-IMPORTANT this project has been discontinued. It's child is (https://gitlab.com/gresakg/google-analytics-integration)[Google Analytics Integration]
+IMPORTANT this project has been discontinued. It's child is (Google Analytics Integration)[https://gitlab.com/gresakg/google-analytics-integration]
 
 Dead simple wordpress plugin that inserts GA tracking code to your wordpress site.
 
